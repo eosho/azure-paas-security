@@ -47,7 +47,8 @@ function Deploy-AzDiagnostics {
             "Microsoft.Insights/components",
             "Microsoft.DataFactory/factories",
             "Microsoft.Network/azureFirewalls",
-            "Microsoft.Sql/servers/databases"
+            "Microsoft.Sql/servers/databases",
+            "Microsoft.Keyvault/vaults"
         )
 
         foreach ($type in $validResourceTypes) {
