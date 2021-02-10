@@ -1,6 +1,6 @@
 # Azure PaaS Reference Design
 
-This reference design implements a hub-and-spoke networking model with all data plane operations happening within VNets through the use of Private Link. This design establishes a clear network perimeter and includes centralized control of all ingress and egress traffic by way of Azure Firewall deployed in the hub VNet. Many aspects of this design are enforced via Azure Policy to ensure a seucre baseline is maintained.
+This reference design implements a hub-and-spoke networking model with all data plane operations happening within VNets through the use of Private Link. This design establishes a clear network perimeter and includes centralized control of all ingress and egress traffic by way of Azure Firewall deployed in the hub VNet. Many aspects of this design are enforced via Azure Policy to ensure a secure baseline is maintained.
 
 <img src="images/diagram-network.png" alt="Network diagram"/>
 
@@ -8,7 +8,7 @@ This reference design implements a hub-and-spoke networking model with all data 
 
 This reference environment includes two main areas that are deployed in the target subscription.
 
-* [Azure Policies](policies/readme.md) - Ensure a conssitent security baseline is maintained
+* [Azure Policies](policies/readme.md) - Ensure a consistent security baseline is maintained
 * [Azure Infrastructure](deployments/readme.md) - Represents the solution design
 * [Azure Monitoring](monitoring/readme.md) - Contains information about what's being monitored
 
@@ -16,7 +16,7 @@ Navigate to each link before for instructions on how these assets are be deploye
 
 ### CI-CD Workflow
 
-Deployments of each components utlizied in this solution can be deployed & tested with the process of chatOps. The full process is as follows:
+Deployments of each components utilized in this solution can be deployed & tested with the process of chatOps. The full process is as follows:
 
 1. Developer creates a feature branch for changes to code, and pushes changes to the branch.
 1. When the developer is ready, a PR is created to merge the changes into main.
@@ -25,7 +25,7 @@ Deployments of each components utlizied in this solution can be deployed & teste
    - compile and unit test the code (if any)
    - provision resources in Azure, or
    - configure settings on resources
-1. After deployment to a motified component is complete you can trigger other components for testing.
+1. After deployment to a modified component is complete you can trigger other components for testing.
 1. The PR is then merged to main to complete the loop.
 
 > **NOTE**
@@ -34,17 +34,7 @@ Deployments of each components utlizied in this solution can be deployed & teste
 > - uat
 > - prod
 >
-> This is also validated/enforced in the `application.bicep` and `networking.bicep` template files as allowed parameter values.
->
-> ```txt
-> param environment string {
->   allowed: [
->     'dev'
->     'uat'
->     'prod'
->   ]
-> }
-> ```
+> Right now, this is not fully enforced in the ARM templates.
 
 ### ChatOps
 The messages that are issues must be on a single line and have the following syntax:
@@ -59,7 +49,7 @@ The messages that are issues must be on a single line and have the following syn
 
 ### Example
 
-To deploy core infra components in the dev environment, simply write `/core:dev` in your pull request comment. This will automatically trigger the `core-infra-deploy` pipeline and deploy all necessary infrasturcture into the Dev environment (resource group).
+To deploy core infra components in the dev environment, simply write `/core:dev` in your pull request comment. This will automatically trigger the `core-infra-deploy` pipeline and deploy all necessary infrastructure into the Dev environment (resource group).
 
 ![sample_pr](images/sample_pr.png)
 
