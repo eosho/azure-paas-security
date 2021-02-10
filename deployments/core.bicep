@@ -6,15 +6,18 @@ param tags object = {
   component: 'core'
 }
 
+// AAD object Id for kv
+param aadObjectId string
+
 // HUB VNET IP SETTINGS
-param bastionSubnetAddressPrefix string = '10.10.0.128/25'  // 123 addresses - 10.10.0.128 - 10.10.0.255
-param desktopSubnetAddressPrefix string = '10.10.1.0/25'    // 123 addresses - 10.10.1.0 - 10.10.1.127
+param bastionSubnetAddressPrefix string = '10.10.0.128/25' // 123 addresses - 10.10.0.128 - 10.10.0.255
+param desktopSubnetAddressPrefix string = '10.10.1.0/25' // 123 addresses - 10.10.1.0 - 10.10.1.127
 
 // SPOKE VNET IP SETTINGS
 param spokeVnetAddressSpace string = '10.20.0.0/20'
-param devopsSubnetAddressPrefix string = '10.20.0.64/26'        // 59 addresses - 10.20.0.64 - 10.20.0.128
-param azServicesSubnetAddressPrefix string = '10.20.1.0/24'     // 251 addresses - 10.20.1.0 - 10.20.1.255
-param integrationSubnetAddressPrefix string = '10.20.2.0/25'    // 123 addresses - 10.20.2.0 - 10.20.2.127
+param devopsSubnetAddressPrefix string = '10.20.0.64/26' // 59 addresses - 10.20.0.64 - 10.20.0.128
+param azServicesSubnetAddressPrefix string = '10.20.1.0/24' // 251 addresses - 10.20.1.0 - 10.20.1.255
+param integrationSubnetAddressPrefix string = '10.20.2.0/25' // 123 addresses - 10.20.2.0 - 10.20.2.127
 
 // DESKTOP
 param vmAdminUserName string = 'vmadmin'
@@ -112,6 +115,12 @@ module spokeVnet 'modules/vnet.bicep' = {
         name: 'azureservices'
         properties: {
           addressPrefix: azServicesSubnetAddressPrefix
+          serviceEndpoints: [
+            {
+              service: 'Microsoft.KeyVault'
+              locations: '*'
+            }
+          ]
           routeTable: {
             id: route.outputs.id
           }
@@ -167,7 +176,7 @@ module desktopNsg 'modules/nsg.bicep' = {
           destinationPortRanges: [
             '22'
             '3389'
-          ] 
+          ]
         }
       }
       {
@@ -213,88 +222,88 @@ module bastionNsg 'modules/nsg.bicep' = {
     name: '${appPrefix}-hub-bastion'
     networkWatcherName: networkWatcherName
     securityRules: [
-        // SEE: https://docs.microsoft.com/en-us/azure/bastion/bastion-nsg#apply
-        {
-          name: 'bastion-ingress'
-          properties: {
-            priority: 100
-            protocol: 'Tcp'
-            access: 'Allow'
-            direction: 'Inbound'
-            sourceAddressPrefix: 'Internet'
-            sourcePortRange: '*'
-            destinationAddressPrefix: '*'
-            destinationPortRange: '443'
-          }
+      // SEE: https://docs.microsoft.com/en-us/azure/bastion/bastion-nsg#apply
+      {
+        name: 'bastion-ingress'
+        properties: {
+          priority: 100
+          protocol: 'Tcp'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourceAddressPrefix: 'Internet'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '443'
         }
-        {
-          name: 'bastion-gatewaymgr'
-          properties: {
-            priority: 120
-            protocol: 'Tcp'
-            access: 'Allow'
-            direction: 'Inbound'
-            sourceAddressPrefix: 'GatewayManager'
-            sourcePortRange: '*'
-            destinationAddressPrefix: '*'
-            destinationPortRange: '443'
-          }
+      }
+      {
+        name: 'bastion-gatewaymgr'
+        properties: {
+          priority: 120
+          protocol: 'Tcp'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourceAddressPrefix: 'GatewayManager'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '443'
         }
-        {
-          name: 'bastion-loadbalancer'
-          properties: {
-            priority: 140
-            protocol: 'Tcp'
-            access: 'Allow'
-            direction: 'Inbound'
-            sourceAddressPrefix: 'AzureLoadBalancer'
-            sourcePortRange: '*'
-            destinationAddressPrefix: '*'
-            destinationPortRange: '443'
-          }
+      }
+      {
+        name: 'bastion-loadbalancer'
+        properties: {
+          priority: 140
+          protocol: 'Tcp'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourceAddressPrefix: 'AzureLoadBalancer'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '443'
         }
-        {
-          name: 'allow-ssh-rdp-vnet'
-          properties: {
-            priority: 100
-            protocol: '*'
-            access: 'Allow'
-            direction: 'Outbound'
-            sourceAddressPrefix: '*'
-            sourcePortRange: '*'
-            destinationAddressPrefix: 'VirtualNetwork'
-            destinationPortRanges: [
-              '22'
-              '3389'
-            ]
-          }
+      }
+      {
+        name: 'allow-ssh-rdp-vnet'
+        properties: {
+          priority: 100
+          protocol: '*'
+          access: 'Allow'
+          direction: 'Outbound'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: 'VirtualNetwork'
+          destinationPortRanges: [
+            '22'
+            '3389'
+          ]
         }
-        {
-          name: 'allow-azure-dependencies'
-          properties: {
-            priority: 120
-            protocol: '*'
-            access: 'Allow'
-            direction: 'Outbound'
-            sourceAddressPrefix: '*'
-            sourcePortRange: '*'
-            destinationAddressPrefix: 'AzureCloud'
-            destinationPortRange: '443'
-          }
+      }
+      {
+        name: 'allow-azure-dependencies'
+        properties: {
+          priority: 120
+          protocol: '*'
+          access: 'Allow'
+          direction: 'Outbound'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: 'AzureCloud'
+          destinationPortRange: '443'
         }
-        {
-          name: 'deny-internet'
-          properties: {
-            priority: 140
-            protocol: '*'
-            access: 'Deny'
-            direction: 'Outbound'
-            sourceAddressPrefix: '*'
-            sourcePortRange: '*'
-            destinationAddressPrefix: 'Internet'
-            destinationPortRange: '*'
-          }
+      }
+      {
+        name: 'deny-internet'
+        properties: {
+          priority: 140
+          protocol: '*'
+          access: 'Deny'
+          direction: 'Outbound'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: 'Internet'
+          destinationPortRange: '*'
         }
+      }
     ]
   }
 }
@@ -310,7 +319,6 @@ module devopsNsg 'modules/nsg.bicep' = {
     name: '${appPrefix}-app-devops'
     networkWatcherName: networkWatcherName
     securityRules: [
-
       /* Internet egress will be forced through Azure Fireall. Deny at the NSG level supercedes UDR flow
       {
         name: 'deny-inbound-default'
@@ -576,7 +584,6 @@ module hubVnetAzureBlobStorageZoneLink 'modules/dnszonelink.bicep' = {
   }
 }
 
-
 // Private DNS for Azure Data Factory
 module privateZoneAzureDataFactory 'modules/dnszoneprivate.bicep' = {
   name: 'dns-private-datafactory'
@@ -708,7 +715,6 @@ module hubVnetAzureZoneLink 'modules/dnszonelink.bicep' = {
   }
 }
 
-
 // TODO: THIS IS A HACK - need to find a better way to apply the UDR to the desktop subnet
 module applyUdrForDesktop 'modules/vnet.bicep' = {
   name: 'hub-vnet-applyDesktopUDR'
@@ -745,6 +751,30 @@ module applyUdrForDesktop 'modules/vnet.bicep' = {
             id: route.outputs.id
           }
         }
+      }
+    ]
+  }
+}
+
+// Keyvault deployment to spoke vnet
+// subnet - azureservices
+module kv 'modules/keyvault.bicep' = {
+  name: 'kv-deploy'
+  scope: resourceGroup(netrg.name)
+  dependsOn: [
+    hubVnet
+    spokeVnet
+    HubToSpokePeering
+    SpokeToHubPeering
+  ]
+  params: {
+    vaultName: '${uniqueString(netrg.id)}-kv'
+    tags: tags
+    skuName: 'standard'
+    objectId: aadObjectId
+    virtualNetworkRules: [
+      {
+       id: '${spokeVnet.outputs.id}/subnets/azureservices'
       }
     ]
   }
